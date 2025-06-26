@@ -1,0 +1,33 @@
+# 🏠 Einfache Home Assistant Terminal Befehle
+# Diese Befehle DIREKT im Home Assistant Web Terminal eingeben
+
+# 1. Verzeichnisse erstellen
+mkdir -p /addons/local/bauplan-checker
+mkdir -p /share/bauplan-checker
+echo "✅ Verzeichnisse erstellt"
+
+# 2. System-Info anzeigen
+echo "🏠 Home Assistant System Info:"
+echo "Hostname: $(hostname)"
+echo "IP-Adresse: $(hostname -I)"
+echo "Freier Speicher: $(df -h /addons | tail -1 | awk '{print $4}')"
+
+# 3. USB-Stick finden (falls verwendet)
+echo "🔍 USB-Geräte:"
+ls -la /dev/sd* 2>/dev/null || echo "Keine USB-Sticks gefunden"
+
+# 4. Wenn Sie USB verwenden:
+# mount /dev/sda1 /mnt
+# cp /mnt/bauplan-checker-homeassistant-addon.tar.gz /tmp/
+# umount /mnt
+
+# 5. Installation (nur wenn Datei in /tmp vorhanden):
+# cd /tmp
+# tar -xzf bauplan-checker-homeassistant-addon.tar.gz
+# cp -r bauplan-checker-addon/* /addons/local/bauplan-checker/
+# chmod +x /addons/local/bauplan-checker/run.sh
+
+# 6. Supervisor neustarten
+# systemctl restart hassio-supervisor
+
+echo "📋 Bereit für nächste Schritte!" 

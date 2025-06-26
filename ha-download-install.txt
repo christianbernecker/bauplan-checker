@@ -1,0 +1,82 @@
+# 🌐 Home Assistant: Download & Installation Befehle
+# Diese Befehle DIREKT im Home Assistant Web Terminal eingeben
+
+echo "🏠 Bauplan-Checker Installation via HTTP Download"
+echo "================================================"
+
+# 1. Verzeichnisse erstellen
+mkdir -p /addons/local/bauplan-checker
+mkdir -p /share/bauplan-checker
+mkdir -p /tmp/bauplan-install
+echo "✅ Verzeichnisse erstellt"
+
+# 2. Datei von Mac herunterladen (HTTP Server läuft auf Mac)
+echo "📥 Lade Add-on von Mac herunter..."
+cd /tmp
+wget http://192.168.178.145:8080/bauplan-checker-homeassistant-addon.tar.gz
+
+# 3. Download prüfen
+echo "📊 Download-Status:"
+ls -lh bauplan-checker-homeassistant-addon.tar.gz
+
+# 4. Entpacken und installieren
+echo "📦 Entpacke Add-on..."
+tar -xzf bauplan-checker-homeassistant-addon.tar.gz
+
+# 5. Dateien verschieben
+echo "🔧 Installiere Add-on..."
+cp -r bauplan-checker-addon/* /addons/local/bauplan-checker/
+
+# 6. Berechtigungen setzen
+chmod +x /addons/local/bauplan-checker/run.sh
+
+# 7. Add-on Konfiguration erstellen (JSON Format für HA)
+cat > /addons/local/bauplan-checker/config.yaml << 'CONFIGEOF'
+name: "Bauplan-Checker"
+description: "DIN-Normen Compliance Checker für Baupläne"
+version: "1.0.0"
+slug: "bauplan_checker"
+init: false
+arch:
+  - aarch64
+  - armv7
+startup: services
+boot: auto
+map:
+  - share:rw
+  - addons:rw
+ports:
+  8000/tcp: 8000
+  3000/tcp: 3000
+ports_description:
+  8000/tcp: "Backend API"
+  3000/tcp: "Frontend Web-UI"
+options:
+  openai_api_key: ""
+  log_level: "info"
+schema:
+  openai_api_key: str
+  log_level: list(debug|info|warning|error)?
+CONFIGEOF
+
+# 8. Supervisor neustarten für Add-on Erkennung
+echo "🔄 Supervisor wird neugestartet..."
+systemctl restart hassio-supervisor
+
+# 9. Status anzeigen
+echo "📊 Installation Status:"
+echo "Add-on Verzeichnis: $(ls -la /addons/local/bauplan-checker/ | wc -l) Dateien"
+echo "Freier Speicher: $(df -h /addons | tail -1 | awk '{print $4}')"
+
+echo ""
+echo "🎉 INSTALLATION ABGESCHLOSSEN!"
+echo "Nächste Schritte:"
+echo "1. Home Assistant → Settings → Add-ons"
+echo "2. ⟳ Reload klicken"
+echo "3. Local Add-ons → Bauplan-Checker"
+echo "4. Install → Configuration → OpenAI API Key"
+echo "5. Start"
+echo ""
+echo "Zugang nach Start:"
+echo "- Frontend: http://192.168.178.87:3000"
+echo "- Backend:  http://192.168.178.87:8000"

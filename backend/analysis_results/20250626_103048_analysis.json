@@ -1,0 +1,70 @@
+{
+  "id": "20250626_103048",
+  "filename": "20250626_103048_U07_B01_IS-ABA009930-PLF-Lageplan_Gesamt.pdf",
+  "original_filename": "U07_B01_IS-ABA009930-PLF-Lageplan_Gesamt.pdf",
+  "upload_time": "20250626_103048",
+  "file_size": 1741436,
+  "page_count": 1,
+  "text_preview": "# Gescanntes PDF - Nur visuelle Analyse verfügbar",
+  "text_length": 49,
+  "initial_analysis": {
+    "visual_analysis": {
+      "error": "Vision-Analyse fehlgeschlagen",
+      "details": "Unable to get page count. Is poppler installed and in PATH?",
+      "status": "Bitte API-Konfiguration und Modell-Zugang prüfen"
+    },
+    "text_metadata": {
+      "text_available": true,
+      "error": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-your-***************here. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}",
+      "text_length": 49
+    }
+  },
+  "status": "technical_din_checked",
+  "din_check": {
+    "technical_compliance": {
+      "overall_compliance": "mangelhaft",
+      "din_checks": {
+        "DIN_EN_ISO_5457": {
+          "standard": "DIN EN ISO 5457",
+          "compliance": "mangelhaft",
+          "issues": [
+            "Schriftfeld fehlt"
+          ],
+          "recommendations": [
+            "Standardisiertes Schriftfeld nach DIN EN ISO 5457 hinzufügen",
+            "Zeichnungsrahmen hinzufügen",
+            "Standardformat verwenden (A0-A4)"
+          ],
+          "score": 0
+        }
+      },
+      "recommendations": [
+        "Systematische Überarbeitung der technischen Zeichnung empfohlen",
+        "Schulung zu DIN-Normen für technische Zeichnungen erwägen"
+      ],
+      "critical_issues": [
+        "Schriftfeld fehlt"
+      ],
+      "score": 0.0
+    },
+    "text_based_analysis": {
+      "erfuellte_anforderungen": [],
+      "moegliche_verstoesse": [],
+      "empfehlungen": [],
+      "kritische_punkte": [],
+      "anwendbare_normen": [],
+      "gesamtbewertung": "problematisch",
+      "timestamp": "2025-06-26T12:04:23.202721",
+      "gpt_model": "gpt-4",
+      "normen_gefunden": 8,
+      "top_normen": [
+        "RIL853_5_2011-03-01",
+        "RIL853_5_2011-03-01",
+        "RIL853_5_2011-03-01"
+      ]
+    },
+    "analysis_type": "comprehensive_technical",
+    "timestamp": "2025-06-26T12:04:23.202765"
+  },
+  "din_check_timestamp": "2025-06-26T12:04:23.202799"
+}

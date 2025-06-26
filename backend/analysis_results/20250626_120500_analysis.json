@@ -1,0 +1,165 @@
+{
+  "id": "20250626_120500",
+  "filename": "20250626_120500_Bauwerksplan_Eisenbahnüberführung_Draufsicht.pdf",
+  "original_filename": "Bauwerksplan_Eisenbahnüberführung_Draufsicht.pdf",
+  "upload_time": "20250626_120500",
+  "file_size": 226457,
+  "page_count": 1,
+  "text_preview": "--- Seite 1 (OCR) ---\nDraufsicht 1.200\n\nBauwerksdaten\n\nBauart: Überbauten: Trägerrost\nUnterbauten: Tiefgründung für Neubau\nN Bauhöhe: 1,97 m\nStützweite: 20.35 m\n/ Lichte Weite: 19,18 m\nLichte Höhe: 25,18 m\n/ Kreuzungswinkel: 82,8 gon\n\n40\n\nAllgemeine Angaben\n\nLastbild: LM 71, « = 1,21\n\n/ Streckengeschwindigkeit: Vmax = 200 km/h\nLichtraumprofil: GC nach M 800.0130\n\nN Die Standorte der neuen Oberleitungsmasten sind\n240 nicht dargestellt.\n\nUnterlage 7.1.1\n\n- 406\n6% - 215 \\ Bestand\n/ — Neubau/Änderun...",
+  "text_length": 2844,
+  "initial_analysis": {
+    "visual_analysis": {
+      "error": "Vision-Analyse fehlgeschlagen",
+      "details": "Error code: 404 - {'error': {'message': 'The model `gpt-4-vision-preview` has been deprecated, learn more here: https://platform.openai.com/docs/deprecations', 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}}",
+      "status": "Bitte API-Konfiguration und Modell-Zugang prüfen"
+    },
+    "text_metadata": {
+      "beschriftungen": {
+        "bauart": "Überbauten: Trägerrost, Unterbauten: Tiefgründung für Neubau",
+        "bauhohe": "1,97 m",
+        "stutzweite": "20.35 m",
+        "lichte_weite": "19,18 m",
+        "lichte_hohe": "25,18 m",
+        "kreuzungswinkel": "82,8 gon",
+        "lastbild": "LM 71, « = 1,21",
+        "streckengeschwindigkeit": "Vmax = 200 km/h",
+        "lichtraumprofil": "GC nach M 800.0130",
+        "standorte_neue_oberleitungsmasten": "nicht dargestellt",
+        "genehmigungsvermerk_eisenbahn_bundesamt": "vorhanden",
+        "lärmschutz": "vorhanden",
+        "torsionsbalken": "vorhanden",
+        "tarmschutz": "6%",
+        "bahnsteig_1": "Haltepunkt B-Dorf",
+        "flurstücksgrenze_kataster": "vorhanden",
+        "zugehörigkeitshaken": "vorhanden",
+        "flurstücksnummer": "2029",
+        "lärmschutz_mit_tür": "vorhanden",
+        "gleis_s_bahn": "vorhanden",
+        "gleis_reise_güterzüge": "vorhanden",
+        "gleis_güterzüge": "vorhanden",
+        "trafostation": "vorhanden",
+        "oberleitungsmast": "ohne / mit Mastnummer",
+        "trogtrasse": "mit Kabelschacht",
+        "entwässerungsgraben": "mit Fließrichtung",
+        "bahnsteig_2": "vorhanden",
+        "versickerungsanlage": "Graben, Becken, Mulde",
+        "stützwand": "vorhanden",
+        "zaun": "vorhanden",
+        "hecke": "gemeinschaftlich",
+        "leitplanke": "vor Bad",
+        "straßenablauf": "vorhanden",
+        "einstiegsschacht": "mit Fließrichtung"
+      },
+      "masse": {
+        "bauhohe": "1,97 m",
+        "stutzweite": "20.35 m",
+        "lichte_weite": "19,18 m",
+        "lichte_hohe": "25,18 m",
+        "kreuzungswinkel": "82,8 gon",
+        "streckengeschwindigkeit": "200 km/h",
+        "tarmschutz": "6%"
+      },
+      "normen_hinweise": {
+        "lichtraumprofil": "GC nach M 800.0130"
+      },
+      "projekt_info": {
+        "unterlage": "7.1.1",
+        "stand": "April 2018",
+        "ausgangsverfahren": "Antragsfassung 03.04.2018",
+        "genehmigungsplanung": "Unterlage für eine Entscheidung nach § 18 AEG",
+        "vorhabenträger": "DB Netz AG (DB), Station&Service AG (DE), DB Energie GmbH (DD)",
+        "projekt_nr": "XXXXXXX",
+        "planzeichen": "GP_07_01-01_BW-0"
+      },
+      "text_available": true
+    }
+  },
+  "status": "technical_din_checked",
+  "din_check": {
+    "technical_compliance": {
+      "overall_compliance": "mangelhaft",
+      "din_checks": {
+        "DIN_EN_ISO_5457": {
+          "standard": "DIN EN ISO 5457",
+          "compliance": "mangelhaft",
+          "issues": [
+            "Schriftfeld fehlt"
+          ],
+          "recommendations": [
+            "Standardisiertes Schriftfeld nach DIN EN ISO 5457 hinzufügen",
+            "Zeichnungsrahmen hinzufügen",
+            "Standardformat verwenden (A0-A4)"
+          ],
+          "score": 0
+        }
+      },
+      "recommendations": [
+        "Systematische Überarbeitung der technischen Zeichnung empfohlen",
+        "Schulung zu DIN-Normen für technische Zeichnungen erwägen"
+      ],
+      "critical_issues": [
+        "Schriftfeld fehlt"
+      ],
+      "score": 0.0
+    },
+    "text_based_analysis": {
+      "erfuellte_anforderungen": [
+        {
+          "norm": "DIN RIL853_5_2011-03-01",
+          "anforderung": "Entwurfsgeschwindigkeit",
+          "erfuellt": true,
+          "bemerkung": "Die geplante Streckengeschwindigkeit von 200 km/h liegt im zulässigen Bereich."
+        },
+        {
+          "norm": "DIN RIL853_5_2011-03-01",
+          "anforderung": "Oberbauform",
+          "erfuellt": true,
+          "bemerkung": "Die Oberbauform 'Trägerrost' ist zulässig."
+        },
+        {
+          "norm": "DIN RIL853_5_2011-03-01",
+          "anforderung": "Längsneigung",
+          "erfuellt": true,
+          "bemerkung": "Es sind keine Angaben zur Längsneigung vorhanden, daher wird angenommen, dass die Norm erfüllt ist."
+        }
+      ],
+      "moegliche_verstoesse": [
+        {
+          "norm": "DIN RIL853_5_2011-03-01",
+          "anforderung": "Gleisradius",
+          "verstoss": true,
+          "bemerkung": "Es sind keine Angaben zum Gleisradius vorhanden, daher kann ein Verstoß gegen die Norm nicht ausgeschlossen werden."
+        }
+      ],
+      "empfehlungen": [
+        {
+          "empfehlung": "Angaben zum Gleisradius hinzufügen, um die Einhaltung der Norm sicherzustellen."
+        }
+      ],
+      "kritische_punkte": [
+        {
+          "kritischer_punkt": "Gleisradius",
+          "bemerkung": "Der Gleisradius ist ein kritischer Punkt, da er einen großen Einfluss auf die Sicherheit und Effizienz des Bahnverkehrs hat."
+        }
+      ],
+      "anwendbare_normen": [
+        {
+          "norm": "DIN RIL853_5_2011-03-01",
+          "referenz": "https://www.beuth.de/de/norm/din-ril853-5-2011-03-01/136998781"
+        }
+      ],
+      "gesamtbewertung": "akzeptabel",
+      "timestamp": "2025-06-26T12:06:32.850111",
+      "gpt_model": "gpt-4",
+      "normen_gefunden": 8,
+      "top_normen": [
+        "RIL853_5_2011-03-01",
+        "RIL853_5_2011-03-01",
+        "RIL853_5_2011-03-01"
+      ]
+    },
+    "analysis_type": "comprehensive_technical",
+    "timestamp": "2025-06-26T12:06:32.850283"
+  },
+  "din_check_timestamp": "2025-06-26T12:06:32.850304"
+}

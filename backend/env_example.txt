@@ -1,0 +1,35 @@
+# Bauplan-Checker Backend Environment Configuration
+# Kopieren Sie diese Datei zu .env und tragen Sie Ihre echten Werte ein
+
+# OpenAI API Configuration
+OPENAI_API_KEY=sk-your-openai-api-key-here
+
+# Environment (development, staging, production)
+ENVIRONMENT=development
+
+# Database Configuration (optional - currently using local files)
+DATABASE_URL=local
+
+# Server Configuration
+HOST=0.0.0.0
+PORT=8000
+
+# File Upload Limits
+MAX_FILE_SIZE_MB=50
+ALLOWED_EXTENSIONS=.pdf
+
+# Logging Level (DEBUG, INFO, WARNING, ERROR)
+LOG_LEVEL=INFO
+
+# CORS Origins (comma separated)
+CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+
+# Optional: Advanced Settings
+CHUNK_SIZE=1000
+CHUNK_OVERLAP=200
+MAX_TOKENS_GPT=2000
+
+# Optional: Custom paths
+UPLOAD_DIR=uploads
+DIN_NORMS_DIR=din_norms
+RESULTS_DIR=analysis_results 

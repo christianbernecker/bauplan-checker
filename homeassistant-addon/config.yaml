@@ -1,0 +1,35 @@
+name: "Bauplan-Checker"
+description: "DIN-Normen Compliance Checker für Baupläne mit OCR und AI-Analyse"
+version: "1.0.0"
+slug: "bauplan_checker"
+init: false
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+ports:
+  3000/tcp: 3000
+  8000/tcp: 8000
+ports_description:
+  3000/tcp: "Frontend Web Interface"
+  8000/tcp: "Backend API"
+webui: "http://[HOST]:[PORT:3000]"
+panel_icon: "mdi:file-document-outline"
+panel_title: "Bauplan-Checker"
+startup: application
+boot: auto
+options:
+  openai_api_key: ""
+  log_level: "info"
+schema:
+  openai_api_key: "str"
+  log_level: "list(debug|info|warning|error)"
+environment:
+  OPENAI_API_KEY: openai_api_key
+  LOG_LEVEL: log_level
+  ENVIRONMENT: production
+map:
+  - share:rw
+  - addon_config:rw
+backup: exclude 

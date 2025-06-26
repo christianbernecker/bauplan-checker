@@ -1,0 +1,80 @@
+name: "Bauplan-Checker"
+description: "🏗️ KI-basierte DIN-Normen Compliance Prüfung für Baupläne mit OCR und AI-Analyse"
+version: "1.0.0"
+slug: "bauplan_checker"
+init: false
+
+# Use pre-built multi-architecture image
+image: "ghcr.io/christianbernecker/bauplan-checker:latest"
+
+# Architecture support (handled by multi-arch image)
+arch:
+  - aarch64
+  - amd64
+
+# Port mapping
+ports:
+  3000/tcp: 3000
+  8000/tcp: 8000
+
+ports_description:
+  3000/tcp: "Frontend Web Interface"
+  8000/tcp: "Backend API"
+
+# Web UI integration
+webui: "http://[HOST]:[PORT:3000]"
+panel_icon: "mdi:file-document-outline"
+panel_title: "Bauplan-Checker"
+panel_admin: true
+
+# Startup configuration
+startup: application
+boot: auto
+
+# Add-on categories
+stage: stable
+advanced: false
+
+# User options
+options:
+  openai_api_key: ""
+  log_level: "info"
+  max_monthly_budget: 20.0
+  warn_at_budget: 15.0
+
+schema:
+  openai_api_key: "str"
+  log_level: "list(debug|info|warning|error)"
+  max_monthly_budget: "float(5.0,100.0)"
+  warn_at_budget: "float(1.0,50.0)"
+
+# Environment variables
+environment:
+  OPENAI_API_KEY: openai_api_key
+  LOG_LEVEL: log_level
+  MAX_MONTHLY_BUDGET: max_monthly_budget
+  WARN_AT_BUDGET: warn_at_budget
+  ENVIRONMENT: production
+
+# Volume mapping for persistent data
+map:
+  - share:rw
+  - addon_config:rw
+
+# Backup settings
+backup: exclude
+
+# No privileged access needed for pre-built image
+privileged: []
+
+# Network configuration
+host_network: false
+host_pid: false
+
+# Documentation
+url: "https://github.com/christianbernecker/bauplan-checker"
+documentation: "https://github.com/christianbernecker/bauplan-checker/blob/main/README.md"
+repository: "https://github.com/christianbernecker/bauplan-checker"
+
+# Support information
+support: "https://github.com/christianbernecker/bauplan-checker/issues" 

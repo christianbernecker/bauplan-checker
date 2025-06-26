@@ -1,0 +1,176 @@
+# Home Assistant Integration für Bauplan-Checker
+# Datei: configuration.yaml (Ergänzungen)
+
+# Panel für direkten Zugriff auf Bauplan-Checker
+panel_iframe:
+  bauplan_checker:
+    title: "Bauplan-Checker"
+    icon: mdi:file-document-outline
+    url: "http://192.168.178.145:3000"
+    require_admin: true
+
+# REST Sensoren für System-Monitoring
+sensor:
+  # Backend Status
+  - platform: rest
+    name: bauplan_checker_backend_status
+    resource: http://192.168.178.145:8000/health
+    value_template: '{{ value_json.status }}'
+    json_attributes:
+      - uptime
+      - version
+      - din_norms_count
+    scan_interval: 60
+    
+  # Statistiken
+  - platform: rest
+    name: bauplan_checker_stats
+    resource: http://192.168.178.145:8000/statistics
+    value_template: '{{ value_json.total_plans }}'
+    json_attributes:
+      - total_plans
+      - plans_with_din_check
+      - plans_with_feedback
+      - average_rating
+      - din_norms_count
+    scan_interval: 300
+
+  # DIN-Normen Status
+  - platform: rest
+    name: bauplan_checker_din_status
+    resource: http://192.168.178.145:8000/din-norms
+    value_template: '{{ value_json.count }}'
+    json_attributes:
+      - status
+      - norms
+    scan_interval: 3600
+
+# Binary Sensoren für Verfügbarkeit
+binary_sensor:
+  - platform: rest
+    name: bauplan_checker_online
+    resource: http://192.168.178.145:8000/health
+    device_class: connectivity
+    scan_interval: 30
+    value_template: >
+      {{ value_json.status == "healthy" }}
+
+# Input Booleans für Automationen
+input_boolean:
+  bauplan_notifications:
+    name: "Bauplan-Checker Benachrichtigungen"
+    icon: mdi:bell-outline
+    initial: true
+
+# Automationen
+automation:
+  # Benachrichtigung bei neuer Analyse
+  - alias: "Bauplan-Checker: Analyse abgeschlossen"
+    description: "Benachrichtigung wenn eine Bauplan-Analyse fertig ist"
+    trigger:
+      - platform: state
+        entity_id: sensor.bauplan_checker_stats
+        attribute: total_plans
+    condition:
+      - condition: state
+        entity_id: input_boolean.bauplan_notifications
+        state: 'on'
+      - condition: template
+        value_template: >
+          {{ trigger.to_state.attributes.total_plans > trigger.from_state.attributes.total_plans }}
+    action:
+      - service: notify.mobile_app_your_device  # Anpassen an Ihr Gerät
+        data:
+          title: "🏗️ Bauplan-Analyse abgeschlossen"
+          message: >
+            Ein neuer Bauplan wurde erfolgreich analysiert.
+            Gesamt: {{ states.sensor.bauplan_checker_stats.attributes.total_plans }} Pläne
+          data:
+            actions:
+              - action: "VIEW_BAUPLAN"
+                title: "Öffnen"
+                uri: "http://192.168.178.145:3000"
+
+  # Warnung bei System-Problemen  
+  - alias: "Bauplan-Checker: System offline"
+    description: "Warnung wenn Bauplan-Checker nicht erreichbar ist"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.bauplan_checker_online
+        to: 'off'
+        for:
+          minutes: 5
+    action:
+      - service: notify.persistent_notification
+        data:
+          title: "⚠️ Bauplan-Checker offline"
+          message: >
+            Das Bauplan-Checker System ist seit 5 Minuten nicht erreichbar.
+            Bitte prüfen Sie die Raspberry Pi Verbindung.
+
+  # Täglicher Status-Bericht
+  - alias: "Bauplan-Checker: Täglicher Bericht"
+    description: "Täglicher Status-Bericht"
+    trigger:
+      - platform: time
+        at: "08:00:00"
+    condition:
+      - condition: state
+        entity_id: input_boolean.bauplan_notifications
+        state: 'on'
+    action:
+      - service: notify.mobile_app_your_device
+        data:
+          title: "📊 Bauplan-Checker Tagesbericht"
+          message: >
+            System Status: {{ states('sensor.bauplan_checker_backend_status') }}
+            Analysierte Pläne: {{ states.sensor.bauplan_checker_stats.attributes.total_plans }}
+            DIN-Normen verfügbar: {{ states('sensor.bauplan_checker_din_status') }}
+            Durchschnittsbewertung: {{ states.sensor.bauplan_checker_stats.attributes.average_rating | round(1) }}/5
+
+# Scripts für manuelle Aktionen
+script:
+  restart_bauplan_checker:
+    alias: "Bauplan-Checker neustarten"
+    icon: mdi:restart
+    sequence:
+      - service: shell_command.restart_bauplan_checker
+
+# Shell Commands (optional, erfordert SSH-Zugang)
+shell_command:
+  restart_bauplan_checker: >
+    ssh pi@192.168.178.145 'cd /home/pi/bauplan-checker && docker-compose restart'
+
+# Lovelace Dashboard Card Beispiel
+# Zur configuration.yaml oder zu einer Dashboard-YAML hinzufügen:
+
+# Entities Card für Bauplan-Checker
+# type: entities
+# title: 🏗️ Bauplan-Checker
+# entities:
+#   - entity: sensor.bauplan_checker_backend_status
+#     name: "Backend Status"
+#   - entity: sensor.bauplan_checker_stats
+#     name: "Analysierte Pläne"
+#   - entity: sensor.bauplan_checker_din_status  
+#     name: "DIN-Normen"
+#   - entity: binary_sensor.bauplan_checker_online
+#     name: "System Online"
+#   - entity: input_boolean.bauplan_notifications
+#     name: "Benachrichtigungen"
+# state_color: true
+
+# Picture Elements Card für visuellen Zugriff
+# type: picture-elements
+# image: /local/bauplan-checker-bg.jpg  # Hintergrundbild hinzufügen
+# elements:
+#   - type: icon
+#     icon: mdi:file-document-outline
+#     tap_action:
+#       action: url
+#       url_path: http://192.168.178.145:3000
+#     style:
+#       top: 50%
+#       left: 50%
+#       color: white
+#       transform: scale(2) 

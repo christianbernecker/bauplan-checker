@@ -1,0 +1,78 @@
+# Multi-stage build for optimal ARM64/AMD64 support
+FROM node:18-alpine AS frontend-builder
+
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm ci --only=production
+COPY frontend/ ./
+RUN npm run build
+
+# Python backend stage
+FROM python:3.11-alpine AS backend-builder
+
+WORKDIR /app
+COPY backend/requirements.txt ./
+RUN apk add --no-cache \
+    gcc \
+    musl-dev \
+    python3-dev \
+    linux-headers \
+    && pip3 install --no-cache-dir -r requirements.txt
+
+# Final production image
+FROM python:3.11-alpine
+
+# Install system dependencies
+RUN apk add --no-cache \
+    tesseract-ocr \
+    tesseract-ocr-data-deu \
+    tesseract-ocr-data-eng \
+    poppler-utils \
+    nodejs \
+    npm \
+    curl \
+    bash \
+    && rm -rf /var/cache/apk/*
+
+WORKDIR /app
+
+# Copy Python dependencies
+COPY --from=backend-builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=backend-builder /usr/local/bin /usr/local/bin
+
+# Copy backend code
+COPY backend/ ./backend/
+COPY main.py ./
+COPY din_processor.py ./
+COPY technical_drawing_processor.py ./
+
+# Copy frontend build
+COPY --from=frontend-builder /app/frontend/build ./frontend/build
+COPY --from=frontend-builder /app/frontend/package*.json ./frontend/
+COPY --from=frontend-builder /app/frontend/node_modules ./frontend/node_modules
+
+# Create necessary directories
+RUN mkdir -p \
+    uploads \
+    din_norms \
+    analysis_results \
+    system_prompts \
+    && chmod -R 755 /app
+
+# Environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+ENV NODE_ENV=production
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Expose ports
+EXPOSE 3000 8000
+
+# Start script
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+CMD ["/start.sh"] 

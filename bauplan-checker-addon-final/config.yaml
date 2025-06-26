@@ -1,0 +1,82 @@
+name: "Bauplan-Checker"
+description: "🏗️ KI-basierte DIN-Normen Compliance Prüfung für Baupläne mit OCR und AI-Analyse"
+version: "1.0.0"
+slug: "bauplan_checker"
+init: false
+
+# Architektur-Unterstützung (nur 64-bit für bessere Performance)
+arch:
+  - aarch64
+  - amd64
+
+# Port-Mapping
+ports:
+  3000/tcp: 3000
+  8000/tcp: 8000
+
+ports_description:
+  3000/tcp: "Frontend Web Interface"
+  8000/tcp: "Backend API"
+
+# Web-UI Integration
+webui: "http://[HOST]:[PORT:3000]"
+panel_icon: "mdi:file-document-outline"
+panel_title: "Bauplan-Checker"
+panel_admin: true
+
+# Startup-Konfiguration
+startup: application
+boot: auto
+
+# Add-on Kategorien
+stage: stable
+advanced: false
+
+# Benutzer-Optionen
+options:
+  openai_api_key: ""
+  log_level: "info"
+  max_monthly_budget: 20.0
+  warn_at_budget: 15.0
+
+schema:
+  openai_api_key: "str"
+  log_level: "list(debug|info|warning|error)"
+  max_monthly_budget: "float(5.0,100.0)"
+  warn_at_budget: "float(1.0,50.0)"
+
+# Umgebungsvariablen
+environment:
+  OPENAI_API_KEY: openai_api_key
+  LOG_LEVEL: log_level
+  MAX_MONTHLY_BUDGET: max_monthly_budget
+  WARN_AT_BUDGET: warn_at_budget
+  ENVIRONMENT: production
+  PYTHONPATH: /app
+
+# Volume-Mapping für persistente Daten
+map:
+  - share:rw
+  - addon_config:rw
+
+# Backup-Einstellungen (Include für wichtige Daten)
+backup: exclude
+
+# Privilegien
+privileged:
+  - SYS_ADMIN
+
+# Host-Netzwerk für bessere Integration
+host_network: false
+host_pid: false
+
+# Zusätzliche Konfiguration
+url: "https://github.com/christianbernecker/bauplan-checker"
+codenotary: notarize@home-assistant.io
+
+# Dokumentation
+documentation: "https://github.com/christianbernecker/bauplan-checker/blob/main/README.md"
+repository: "https://github.com/christianbernecker/bauplan-checker"
+
+# Support-Informationen
+support: "https://github.com/christianbernecker/bauplan-checker/issues" 

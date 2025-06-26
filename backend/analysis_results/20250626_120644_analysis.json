@@ -1,0 +1,23 @@
+{
+  "id": "20250626_120644",
+  "filename": "20250626_120644_Bauwerksplan_Eisenbahnüberführung_Draufsicht.pdf",
+  "original_filename": "Bauwerksplan_Eisenbahnüberführung_Draufsicht.pdf",
+  "upload_time": "20250626_120644",
+  "file_size": 226457,
+  "page_count": 1,
+  "text_preview": "--- Seite 1 (OCR) ---\nDraufsicht 1.200\n\nBauwerksdaten\n\nBauart: Überbauten: Trägerrost\nUnterbauten: Tiefgründung für Neubau\nN Bauhöhe: 1,97 m\nStützweite: 20.35 m\n/ Lichte Weite: 19,18 m\nLichte Höhe: 25,18 m\n/ Kreuzungswinkel: 82,8 gon\n\n40\n\nAllgemeine Angaben\n\nLastbild: LM 71, « = 1,21\n\n/ Streckengeschwindigkeit: Vmax = 200 km/h\nLichtraumprofil: GC nach M 800.0130\n\nN Die Standorte der neuen Oberleitungsmasten sind\n240 nicht dargestellt.\n\nUnterlage 7.1.1\n\n- 406\n6% - 215 \\ Bestand\n/ — Neubau/Änderun...",
+  "text_length": 2844,
+  "initial_analysis": {
+    "visual_analysis": {
+      "error": "Vision-Analyse fehlgeschlagen",
+      "details": "Error code: 404 - {'error': {'message': 'The model `gpt-4-vision-preview` has been deprecated, learn more here: https://platform.openai.com/docs/deprecations', 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}}",
+      "status": "Bitte API-Konfiguration und Modell-Zugang prüfen"
+    },
+    "text_metadata": {
+      "text_available": true,
+      "raw_text_length": 2000,
+      "parse_error": "Konnte Textanalyse nicht parsen"
+    }
+  },
+  "status": "uploaded"
+}

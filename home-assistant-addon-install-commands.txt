@@ -1,0 +1,29 @@
+# Home Assistant Add-on Installation - Korrigierte Befehle
+# Führe diese Befehle im Home Assistant Terminal aus
+
+# 1. Add-on Verzeichnis überprüfen
+ls -la /data/addons/local/
+
+# 2. Bauplan-Checker Verzeichnis prüfen
+ls -la /data/addons/local/bauplan-checker/
+
+# 3. Config.yaml überprüfen
+cat /data/addons/local/bauplan-checker/config.yaml | grep slug
+
+# 4. Add-on mit korrektem slug installieren
+ha addons install local_bauplan_checker
+
+# 5. Add-on starten
+ha addons start local_bauplan_checker
+
+# 6. Add-on Status prüfen
+ha addons info local_bauplan_checker
+
+# 7. Logs anzeigen (falls Probleme)
+ha addons logs local_bauplan_checker
+
+# 8. Supervisor neu laden (falls nötig)
+ha supervisor reload
+
+# 9. Alle lokalen Add-ons auflisten
+ha addons --raw-json | jq '.data.addons[] | select(.repository == "local") | {slug, name, state}'

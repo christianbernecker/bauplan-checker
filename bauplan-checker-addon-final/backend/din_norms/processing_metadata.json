@@ -1,0 +1,82 @@
+{
+  "processed_date": "2025-06-26T13:29:46.724072",
+  "file_count": 10,
+  "total_chunks": 7212,
+  "chunk_count": 7212,
+  "processed_files": [
+    {
+      "filename": "ZTV-ING-Teil-1-10-Baudurchfuehrung_04_2019.pdf",
+      "last_modified": 1750928871.795466,
+      "size": 13552511,
+      "path": "din_norms/ZTV-ING-Teil-1-10-Baudurchfuehrung_04_2019.pdf"
+    },
+    {
+      "filename": "RIL853_4_2007-01-02.pdf",
+      "last_modified": 1750928922.8112943,
+      "size": 5531722,
+      "path": "din_norms/RIL853_4_2007-01-02.pdf"
+    },
+    {
+      "filename": "DIN EN 1992-1-2_NA.pdf",
+      "last_modified": 1750928846.1635392,
+      "size": 906794,
+      "path": "din_norms/DIN EN 1992-1-2_NA.pdf"
+    },
+    {
+      "filename": "DIN_EN_1992-3.pdf",
+      "last_modified": 1750928772.5844889,
+      "size": 945157,
+      "path": "din_norms/DIN_EN_1992-3.pdf"
+    },
+    {
+      "filename": "DIN_EN_1992-2.pdf",
+      "last_modified": 1750928737.2879612,
+      "size": 2327554,
+      "path": "din_norms/DIN_EN_1992-2.pdf"
+    },
+    {
+      "filename": "Ril 853 Eisenbahntunnel planen, bauen und instand halten.pdf",
+      "last_modified": 1750928922.8466504,
+      "size": 11636439,
+      "path": "din_norms/Ril 853 Eisenbahntunnel planen, bauen und instand halten.pdf"
+    },
+    {
+      "filename": "DIN_EN_1992-1-2.pdf",
+      "last_modified": 1750928731.6827383,
+      "size": 4104089,
+      "path": "din_norms/DIN_EN_1992-1-2.pdf"
+    },
+    {
+      "filename": "RIL853_5_2011-03-01.pdf",
+      "last_modified": 1750928922.8328125,
+      "size": 8678010,
+      "path": "din_norms/RIL853_5_2011-03-01.pdf"
+    },
+    {
+      "filename": "836_4106-Aktualisierung_20140218.pdf",
+      "last_modified": 1750928871.7813547,
+      "size": 508579,
+      "path": "din_norms/836_4106-Aktualisierung_20140218.pdf"
+    },
+    {
+      "filename": "RiZ-ING-Gesamtfassung-Entwurf.pdf",
+      "last_modified": 1750928871.813928,
+      "size": 11368108,
+      "path": "din_norms/RiZ-ING-Gesamtfassung-Entwurf.pdf"
+    }
+  ],
+  "files": [
+    "ZTV-ING-Teil-1-10-Baudurchfuehrung_04_2019.pdf",
+    "RIL853_4_2007-01-02.pdf",
+    "DIN EN 1992-1-2_NA.pdf",
+    "DIN_EN_1992-3.pdf",
+    "DIN_EN_1992-2.pdf",
+    "Ril 853 Eisenbahntunnel planen, bauen und instand halten.pdf",
+    "DIN_EN_1992-1-2.pdf",
+    "RIL853_5_2011-03-01.pdf",
+    "836_4106-Aktualisierung_20140218.pdf",
+    "RiZ-ING-Gesamtfassung-Entwurf.pdf"
+  ],
+  "langchain_available": true,
+  "cache_version": "1.0"
+}

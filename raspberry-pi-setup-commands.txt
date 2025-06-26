@@ -1,0 +1,53 @@
+# 🍓 Bauplan-Checker Raspberry Pi Setup Befehle
+
+# 1. SSH aktivieren (am Raspberry Pi ausführen):
+sudo systemctl enable ssh
+sudo systemctl start ssh
+
+# 2. Nach SSH-Aktivierung, diese Befehle hier auf dem Mac ausführen:
+./transfer-to-raspberry.sh 192.168.178.145 pi
+
+# 3. Dann SSH zum Raspberry Pi:
+ssh pi@192.168.178.145
+
+# 4. Auf dem Raspberry Pi ausführen:
+cd /home/pi/bauplan-checker
+
+# 5. .env Datei erstellen:
+cat > .env << 'ENVEOF'
+OPENAI_API_KEY=your_openai_api_key_here
+ENVIRONMENT=production
+HOST=0.0.0.0
+PORT=8000
+RASPBERRY_PI_IP=192.168.178.145
+FRONTEND_URL=http://192.168.178.145:3000
+BACKEND_URL=http://192.168.178.145:8000
+HASS_TOKEN=your_homeassistant_token_here
+HASS_URL=http://homeassistant.local:8123
+COMPOSE_PROJECT_NAME=bauplan_checker
+DOCKER_BUILDKIT=1
+NGINX_PORT_HTTP=80
+NGINX_PORT_HTTPS=443
+JWT_SECRET=change_this_jwt_secret_for_production
+CORS_ORIGINS=http://192.168.178.145:3000,http://localhost:3000
+LOG_LEVEL=INFO
+LOG_DIR=/app/logs
+MAX_WORKERS=2
+WORKER_TIMEOUT=300
+UPLOAD_MAX_SIZE=100MB
+AI_MODEL=gpt-4
+AI_TEMPERATURE=0.1
+MAX_TOKENS=2000
+BACKUP_ENABLED=true
+BACKUP_SCHEDULE="0 2 * * *"
+ENVEOF
+
+# 6. .env bearbeiten und echten OpenAI API Key einsetzen:
+nano .env
+
+# 7. Deployment starten:
+./deploy-raspberry-pi.sh
+
+# 8. System testen:
+curl http://192.168.178.145:8000/health
+curl http://192.168.178.145:3000

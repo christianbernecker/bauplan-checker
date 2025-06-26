@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  bauplan-checker-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.raspberrypi
+    container_name: bauplan-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data/uploads:/app/backend/uploads
+      - ./data/din_norms:/app/backend/din_norms
+      - ./data/analysis_results:/app/backend/analysis_results
+      - ./data/system_prompts:/app/backend/system_prompts
+      - ./logs:/app/logs
+    environment:
+      - ENVIRONMENT=production
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - HOST=0.0.0.0
+      - PORT=8000
+    restart: unless-stopped
+    networks:
+      - bauplan-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  bauplan-checker-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.raspberrypi
+    container_name: bauplan-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://192.168.178.145:8000
+    depends_on:
+      - bauplan-checker-backend
+    restart: unless-stopped
+    networks:
+      - bauplan-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx Reverse Proxy für bessere Integration
+  nginx:
+    image: nginx:alpine
+    container_name: bauplan-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - bauplan-checker-backend
+      - bauplan-checker-frontend
+    restart: unless-stopped
+    networks:
+      - bauplan-network
+
+  # Optional: Watchtower für automatische Updates
+  watchtower:
+    image: containrrr/watchtower:arm64v8-latest
+    container_name: bauplan-watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_SCHEDULE=0 0 2 * * *  # 2 Uhr nachts
+      - WATCHTOWER_NOTIFICATIONS=shoutrrr://generic+http://homeassistant.local:8123/api/services/notify/mobile_app_YOUR_DEVICE?token=YOUR_HA_TOKEN
+    restart: unless-stopped
+    networks:
+      - bauplan-network
+
+networks:
+  bauplan-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  bauplan-data:
+    driver: local 
