@@ -50,7 +50,6 @@ yarn-debug.log*
 yarn-error.log*
 .npm
 .next/
-package-lock.json
 
 # Git directories in subdirectories
 frontend/.git/
