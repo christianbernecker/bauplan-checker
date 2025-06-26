@@ -2,8 +2,8 @@
 FROM node:18-alpine AS frontend-builder
 
 WORKDIR /app/frontend
-COPY frontend/package*.json ./
-RUN npm ci
+COPY frontend/package.json ./
+RUN npm install --no-package-lock
 COPY frontend/ ./
 RUN npm run build
 
@@ -45,7 +45,7 @@ COPY backend/ ./
 
 # Copy frontend build
 COPY --from=frontend-builder /app/frontend/build ./frontend/build
-COPY --from=frontend-builder /app/frontend/package*.json ./frontend/
+COPY --from=frontend-builder /app/frontend/package.json ./frontend/
 COPY --from=frontend-builder /app/frontend/node_modules ./frontend/node_modules
 
 # Create necessary directories
