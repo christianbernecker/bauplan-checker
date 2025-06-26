@@ -8,8 +8,14 @@ WORKDIR /build
 # Install build dependencies for Alpine
 RUN apk add --no-cache python3 make g++
 
+# Debug: Show what's available in the build context
+RUN echo "=== DEBUG: Build context contents ===" && find /build -type f 2>/dev/null || echo "No files in /build yet"
+
 # Copy package files first for better caching
 COPY frontend/package*.json ./
+
+# Debug: Show what was copied
+RUN echo "=== DEBUG: After copying package.json ===" && ls -la /build/ && cat package.json 2>/dev/null || echo "package.json not found!"
 
 # Install dependencies
 RUN npm install --verbose
