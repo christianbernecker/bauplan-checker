@@ -8,10 +8,11 @@ WORKDIR /build
 # Install build dependencies for Alpine
 RUN apk add --no-cache python3 make g++
 
-# Kopiere Frontend-Dateien
-COPY frontend/package*.json ./
-RUN npm install --verbose
+# Copy entire frontend directory first
 COPY frontend/ ./
+
+# Install dependencies and build
+RUN npm install --verbose
 RUN npm run build
 
 # Backend Dependencies Stage  
