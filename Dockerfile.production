@@ -1,28 +1,28 @@
-# Multi-stage build for production
+# Production Dockerfile für Bauplan-Checker
+# Saubere Multi-Stage Build ohne Verwirrung
+
+# Frontend Build Stage
 FROM node:18-alpine AS frontend-builder
+WORKDIR /build
+# Kopiere NUR die Frontend-Dateien aus dem Root-Verzeichnis
+COPY frontend/package*.json ./
+RUN npm ci --only=production
+COPY frontend/ ./
+RUN npm run build
 
-# Set working directory
-WORKDIR /app
-
-# Copy everything (let dockerignore handle exclusions)
-COPY . .
-
-# Build frontend
-WORKDIR /app/frontend
-RUN npm ci && npm run build
-
-# Backend builder stage
+# Backend Dependencies Stage  
 FROM python:3.11-alpine AS backend-builder
-
-WORKDIR /app
+WORKDIR /build
+# Kopiere NUR die Backend requirements aus dem Root-Verzeichnis
 COPY backend/requirements.txt ./
 RUN apk add --no-cache gcc musl-dev python3-dev linux-headers && \
-    pip3 install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt
 
-# Final production image
+# Final Production Image
 FROM python:3.11-alpine
+WORKDIR /app
 
-# Install system dependencies
+# System Dependencies
 RUN apk add --no-cache \
     tesseract-ocr \
     tesseract-ocr-data-deu \
@@ -33,24 +33,26 @@ RUN apk add --no-cache \
     curl \
     bash
 
-WORKDIR /app
-
-# Copy Python dependencies
+# Copy Python Dependencies
 COPY --from=backend-builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=backend-builder /usr/local/bin /usr/local/bin
 
-# Copy backend
-COPY backend/ ./
+# Copy Backend (NUR aus Root backend/)
+COPY backend/main.py ./
+COPY backend/din_processor.py ./
+COPY backend/technical_drawing_processor.py ./
+COPY backend/requirements.txt ./
+COPY backend/system_prompts/ ./system_prompts/
 
-# Copy frontend build
-COPY --from=frontend-builder /app/frontend/.next ./frontend/.next
-COPY --from=frontend-builder /app/frontend/package*.json ./frontend/
-COPY --from=frontend-builder /app/frontend/node_modules ./frontend/node_modules
-COPY --from=frontend-builder /app/frontend/public ./frontend/public
-COPY --from=frontend-builder /app/frontend/next.config.ts ./frontend/
+# Copy Frontend Build
+COPY --from=frontend-builder /build/.next ./frontend/.next
+COPY --from=frontend-builder /build/package*.json ./frontend/
+COPY --from=frontend-builder /build/node_modules ./frontend/node_modules
+COPY --from=frontend-builder /build/public ./frontend/public
+COPY --from=frontend-builder /build/next.config.ts ./frontend/
 
-# Create directories
-RUN mkdir -p uploads din_norms analysis_results system_prompts && \
+# Create Required Directories
+RUN mkdir -p uploads din_norms analysis_results && \
     chmod -R 755 /app
 
 # Environment
@@ -58,14 +60,14 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
 ENV NODE_ENV=production
 
-# Health check
+# Health Check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
 # Ports
 EXPOSE 3000 8000
 
-# Start script
+# Copy and Setup Start Script
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
