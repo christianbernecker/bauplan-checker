@@ -1,32 +1,21 @@
 # Multi-stage build for optimal ARM64/AMD64 support
 FROM node:18-alpine AS frontend-builder
 
-# Debug: Show what's available
-RUN echo "=== Debugging Frontend Builder ===" && \
-    echo "Current directory:" && pwd && \
-    echo "Available files:" && ls -la /
-
 WORKDIR /app
 
-# Debug: Show build context
-RUN echo "=== Build Context ===" && \
-    echo "Files in /app:" && ls -la . || echo "No files yet"
-
-# Copy entire context first to debug
+# Copy the entire project context
 COPY . .
 
-# Debug: Show what was copied
-RUN echo "=== After COPY . . ===" && \
-    echo "Files in /app:" && ls -la . && \
-    echo "Frontend directory:" && ls -la frontend/ || echo "No frontend directory found"
+# Verify frontend directory exists and has content
+RUN echo "=== Frontend Directory Check ===" && \
+    ls -la && \
+    echo "Frontend directory contents:" && \
+    ls -la frontend/ && \
+    echo "Package.json exists:" && \
+    test -f frontend/package.json && echo "YES" || echo "NO"
 
-# Change to frontend directory
+# Change to frontend directory and build
 WORKDIR /app/frontend
-
-# Verify package.json exists
-RUN echo "=== Package.json Check ===" && \
-    ls -la package*.json && \
-    cat package.json
 
 # Install dependencies
 RUN npm ci --only=production
