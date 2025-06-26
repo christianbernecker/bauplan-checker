@@ -44,12 +44,18 @@ venv.bak/
 *.env
 
 # Node.js
-node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .npm
+
+# Exclude node_modules but allow package.json
+**/node_modules/
+!frontend/package*.json
+
+# Exclude .next from root but allow in frontend build
 .next/
+!frontend/.next/
 
 # Git directories in subdirectories
 frontend/.git/

@@ -1,10 +1,37 @@
 # Multi-stage build for optimal ARM64/AMD64 support
 FROM node:18-alpine AS frontend-builder
 
+# Debug: Show what's available
+RUN echo "=== Debugging Frontend Builder ===" && \
+    echo "Current directory:" && pwd && \
+    echo "Available files:" && ls -la /
+
+WORKDIR /app
+
+# Debug: Show build context
+RUN echo "=== Build Context ===" && \
+    echo "Files in /app:" && ls -la . || echo "No files yet"
+
+# Copy entire context first to debug
+COPY . .
+
+# Debug: Show what was copied
+RUN echo "=== After COPY . . ===" && \
+    echo "Files in /app:" && ls -la . && \
+    echo "Frontend directory:" && ls -la frontend/ || echo "No frontend directory found"
+
+# Change to frontend directory
 WORKDIR /app/frontend
-COPY frontend/package.json ./
-RUN npm install
-COPY frontend/ ./
+
+# Verify package.json exists
+RUN echo "=== Package.json Check ===" && \
+    ls -la package*.json && \
+    cat package.json
+
+# Install dependencies
+RUN npm ci --only=production
+
+# Build the application
 RUN npm run build
 
 # Python backend stage
@@ -43,12 +70,13 @@ COPY --from=backend-builder /usr/local/bin /usr/local/bin
 # Copy backend code and requirements
 COPY backend/ ./
 
-# Copy frontend build
+# Copy frontend build and necessary files
 COPY --from=frontend-builder /app/frontend/.next ./frontend/.next
-COPY --from=frontend-builder /app/frontend/package.json ./frontend/
+COPY --from=frontend-builder /app/frontend/package*.json ./frontend/
 COPY --from=frontend-builder /app/frontend/node_modules ./frontend/node_modules
 COPY --from=frontend-builder /app/frontend/public ./frontend/public
 COPY --from=frontend-builder /app/frontend/next.config.ts ./frontend/
+COPY --from=frontend-builder /app/frontend/tsconfig.json ./frontend/
 
 # Create necessary directories
 RUN mkdir -p \
