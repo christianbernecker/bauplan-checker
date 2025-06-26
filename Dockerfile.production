@@ -4,9 +4,13 @@
 # Frontend Build Stage
 FROM node:18-alpine AS frontend-builder
 WORKDIR /build
+
+# Install build dependencies for Alpine
+RUN apk add --no-cache python3 make g++
+
 # Kopiere Frontend-Dateien
 COPY frontend/package*.json ./
-RUN npm install
+RUN npm install --verbose
 COPY frontend/ ./
 RUN npm run build
 
