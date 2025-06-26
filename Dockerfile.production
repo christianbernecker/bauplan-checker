@@ -42,9 +42,9 @@ COPY --from=backend-builder /usr/local/bin /usr/local/bin
 
 # Copy backend code
 COPY backend/ ./backend/
-COPY main.py ./
-COPY din_processor.py ./
-COPY technical_drawing_processor.py ./
+COPY backend/main.py ./
+COPY backend/din_processor.py ./
+COPY backend/technical_drawing_processor.py ./
 
 # Copy frontend build
 COPY --from=frontend-builder /app/frontend/build ./frontend/build
