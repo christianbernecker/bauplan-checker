@@ -75,4 +75,4 @@ din_norms/*.pdf
 *.pid
 
 # Docker
-.dockerignore 
+# .dockerignore - we need this for Docker builds 

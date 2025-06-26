@@ -1,0 +1,95 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+!README.md
+
+# Logs
+*.log
+logs/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment variables
+.env
+*.env
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Process IDs
+*.pid
+
+# Large files
+*.tar.gz
+*.zip
+
+# Development files
+deploy-*.sh
+stop-*.sh
+install-*.sh
+transfer-*.sh
+health-check.sh
+
+# Config files not needed in container
+docker-compose.yml
+Dockerfile.raspberrypi
+supervisord.conf
+home-assistant-*.yaml
+
+# Temporary directories
+bauplan-checker-addon-*/
+homeassistant-addon/
+bauplan-checker/
+
+# Old upload files and results (will be volume mounted)
+backend/uploads/*.pdf
+backend/analysis_results/*.json 
