@@ -4,9 +4,9 @@
 # Frontend Build Stage
 FROM node:18-alpine AS frontend-builder
 WORKDIR /build
-# Kopiere NUR die Frontend-Dateien aus dem Root-Verzeichnis
+# Kopiere Frontend-Dateien
 COPY frontend/package*.json ./
-RUN npm ci --omit=dev
+RUN npm install
 COPY frontend/ ./
 RUN npm run build
 
