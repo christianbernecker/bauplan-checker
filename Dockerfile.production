@@ -22,7 +22,34 @@ FROM python:3.11-alpine AS backend-builder
 WORKDIR /build
 # Kopiere NUR die Backend requirements aus dem Root-Verzeichnis
 COPY backend/requirements.txt ./
-RUN apk add --no-cache gcc musl-dev python3-dev linux-headers && \
+
+# Install comprehensive build dependencies for complex Python packages
+RUN apk add --no-cache \
+    gcc \
+    musl-dev \
+    python3-dev \
+    linux-headers \
+    g++ \
+    make \
+    cmake \
+    pkgconfig \
+    openblas-dev \
+    lapack-dev \
+    gfortran \
+    jpeg-dev \
+    zlib-dev \
+    freetype-dev \
+    lcms2-dev \
+    openjpeg-dev \
+    tiff-dev \
+    tk-dev \
+    tcl-dev \
+    harfbuzz-dev \
+    fribidi-dev \
+    libimagequant-dev \
+    libxcb-dev \
+    libpng-dev && \
+    pip install --upgrade pip setuptools wheel && \
     pip install --no-cache-dir -r requirements.txt
 
 # Final Production Image
