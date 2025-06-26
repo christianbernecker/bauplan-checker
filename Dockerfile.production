@@ -1,39 +1,23 @@
-# Multi-stage build for optimal ARM64/AMD64 support
+# Multi-stage build for production
 FROM node:18-alpine AS frontend-builder
 
+# Set working directory
 WORKDIR /app
 
-# Copy the entire project context
+# Copy everything (let dockerignore handle exclusions)
 COPY . .
 
-# Verify frontend directory exists and has content
-RUN echo "=== Frontend Directory Check ===" && \
-    ls -la && \
-    echo "Frontend directory contents:" && \
-    ls -la frontend/ && \
-    echo "Package.json exists:" && \
-    test -f frontend/package.json && echo "YES" || echo "NO"
-
-# Change to frontend directory and build
+# Build frontend
 WORKDIR /app/frontend
+RUN npm ci && npm run build
 
-# Install dependencies
-RUN npm ci --only=production
-
-# Build the application
-RUN npm run build
-
-# Python backend stage
+# Backend builder stage
 FROM python:3.11-alpine AS backend-builder
 
 WORKDIR /app
 COPY backend/requirements.txt ./
-RUN apk add --no-cache \
-    gcc \
-    musl-dev \
-    python3-dev \
-    linux-headers \
-    && pip3 install --no-cache-dir -r requirements.txt
+RUN apk add --no-cache gcc musl-dev python3-dev linux-headers && \
+    pip3 install --no-cache-dir -r requirements.txt
 
 # Final production image
 FROM python:3.11-alpine
@@ -47,8 +31,7 @@ RUN apk add --no-cache \
     nodejs \
     npm \
     curl \
-    bash \
-    && rm -rf /var/cache/apk/*
+    bash
 
 WORKDIR /app
 
@@ -56,26 +39,21 @@ WORKDIR /app
 COPY --from=backend-builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=backend-builder /usr/local/bin /usr/local/bin
 
-# Copy backend code and requirements
+# Copy backend
 COPY backend/ ./
 
-# Copy frontend build and necessary files
+# Copy frontend build
 COPY --from=frontend-builder /app/frontend/.next ./frontend/.next
 COPY --from=frontend-builder /app/frontend/package*.json ./frontend/
 COPY --from=frontend-builder /app/frontend/node_modules ./frontend/node_modules
 COPY --from=frontend-builder /app/frontend/public ./frontend/public
 COPY --from=frontend-builder /app/frontend/next.config.ts ./frontend/
-COPY --from=frontend-builder /app/frontend/tsconfig.json ./frontend/
 
-# Create necessary directories
-RUN mkdir -p \
-    uploads \
-    din_norms \
-    analysis_results \
-    system_prompts \
-    && chmod -R 755 /app
+# Create directories
+RUN mkdir -p uploads din_norms analysis_results system_prompts && \
+    chmod -R 755 /app
 
-# Environment variables
+# Environment
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
 ENV NODE_ENV=production
@@ -84,7 +62,7 @@ ENV NODE_ENV=production
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# Expose ports
+# Ports
 EXPOSE 3000 8000
 
 # Start script
