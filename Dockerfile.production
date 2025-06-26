@@ -6,7 +6,7 @@ FROM node:18-alpine AS frontend-builder
 WORKDIR /build
 # Kopiere NUR die Frontend-Dateien aus dem Root-Verzeichnis
 COPY frontend/package*.json ./
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 COPY frontend/ ./
 RUN npm run build
 
