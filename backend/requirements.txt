@@ -1,24 +1,14 @@
-# Core FastAPI Dependencies
+# Core FastAPI Dependencies - Minimal MVP
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
 python-multipart==0.0.6
-pydantic==2.5.0
 
-# PDF Processing - Vereinfacht
+# PDF Processing
 PyPDF2==3.0.1
 
-# AI/ML Dependencies - Aktuelle kompatible Versionen  
+# AI Integration
 openai==1.86.0
-langchain==0.1.0
-langchain-openai==0.3.25
-
-# Vector Database - Nutze pre-compiled Wheels
-faiss-cpu==1.7.4
-
-# OCR - Nur essentials
-pytesseract==0.3.10
 
 # Utilities
 python-dotenv==1.0.0
-httpx==0.25.2
 requests==2.31.0 
