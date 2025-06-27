@@ -1,5 +1,5 @@
 # Production Dockerfile für Bauplan-Checker
-# Saubere Multi-Stage Build ohne Verwirrung
+# Optimierte Multi-Stage Build für schnellere Builds
 
 # Frontend Build Stage
 FROM node:18-alpine AS frontend-builder
@@ -17,55 +17,66 @@ RUN npm install --verbose
 # Build the application
 RUN npm run build
 
-# Backend Dependencies Stage  
-FROM python:3.11-alpine AS backend-builder
+# Backend Dependencies Stage - Verwende Standard Python Image für bessere Wheel-Unterstützung
+FROM python:3.11-slim AS backend-builder
 WORKDIR /build
-# Kopiere NUR die Backend requirements aus dem Root-Verzeichnis
-COPY backend/requirements.txt ./
 
-# Install comprehensive build dependencies for complex Python packages
-RUN apk add --no-cache \
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
     gcc \
-    musl-dev \
-    python3-dev \
-    linux-headers \
     g++ \
     make \
     cmake \
-    pkgconfig \
-    openblas-dev \
-    lapack-dev \
+    pkg-config \
+    libopenblas-dev \
+    liblapack-dev \
     gfortran \
-    jpeg-dev \
-    zlib-dev \
-    freetype-dev \
-    lcms2-dev \
-    openjpeg-dev \
-    tiff-dev \
+    libjpeg-dev \
+    zlib1g-dev \
+    libfreetype6-dev \
+    liblcms2-dev \
+    libopenjp2-7-dev \
+    libtiff5-dev \
     tk-dev \
     tcl-dev \
-    harfbuzz-dev \
-    fribidi-dev \
-    libimagequant-dev \
-    libxcb-dev \
-    libpng-dev && \
-    pip install --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir -r requirements.txt
+    libharfbuzz-dev \
+    libfribidi-dev \
+    libxcb1-dev \
+    libpng-dev \
+    tesseract-ocr \
+    tesseract-ocr-dev \
+    libleptonica-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Final Production Image
-FROM python:3.11-alpine
+# Copy requirements
+COPY backend/requirements.txt ./
+
+# Upgrade pip and install packages with better caching
+RUN pip install --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir --prefer-binary -r requirements.txt
+
+# Final Production Image - Verwende slim für kleinere Image-Größe
+FROM python:3.11-slim
 WORKDIR /app
 
-# System Dependencies
-RUN apk add --no-cache \
+# Install runtime dependencies only
+RUN apt-get update && apt-get install -y \
     tesseract-ocr \
-    tesseract-ocr-data-deu \
-    tesseract-ocr-data-eng \
+    tesseract-ocr-deu \
+    tesseract-ocr-eng \
     poppler-utils \
-    nodejs \
-    npm \
     curl \
-    bash
+    bash \
+    libjpeg62-turbo \
+    libopenblas0 \
+    libgomp1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js for frontend
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs
 
 # Copy Python Dependencies
 COPY --from=backend-builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
