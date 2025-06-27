@@ -166,17 +166,90 @@ bauplan-checker/
 - **DIN-Normen**: Rechtliche Prüfung der Nutzungsrechte erforderlich
 - **Datenschutz**: Sensible Baupläne - lokale Installation empfohlen
 
-### ⚠️ Limitierungen
-- OCR für gescannte PDFs noch nicht implementiert
-- Begrenzte Anzahl DIN-Normen im Demo-System
-- API-Rate-Limits bei OpenAI beachten
+### ⚠️ Aktuelle Limitierungen (MVP Version)
+- **Keine LangChain Integration**: Entfernt für stabile Builds
+- **Keine FAISS Vektordatenbank**: Vereinfacht auf direkte OpenAI API-Calls
+- **Kein OCR**: Gescannte PDFs werden nicht unterstützt
+- **Keine Bildverarbeitung**: Pillow/OpenCV entfernt für Build-Stabilität
+- **Begrenzte DIN-Normen**: Nur manuell hinterlegte Referenzen
+- **API-Rate-Limits**: OpenAI beachten
 
-### 🚀 Geplante Features
-- Batch-Upload für mehrere PDFs
-- Erweiterte Visualisierung mit PDF-Markierungen
-- Team-Funktionen und Benutzerverwaltung
-- Export-Funktionen für Prüfberichte
-- OCR-Integration für gescannte Dokumente
+### 🔧 **Lessons Learned: Docker Build Optimierung**
+
+**Problem gelöst:** Docker Builds dauerten 1+ Stunde und schlugen häufig fehl.
+
+**Root Causes identifiziert:**
+1. **Komplexe Python-Pakete**: `faiss-cpu`, `opencv-python`, `Pillow` benötigen extensive Build-Dependencies
+2. **Dependency Conflicts**: `langchain` vs `langchain-openai` Versionskonflikte
+3. **Alpine Linux Probleme**: Schlechte Wheel-Unterstützung für wissenschaftliche Pakete
+4. **GitHub Actions Attestation**: Fehlende Permissions für Security Features
+
+**Erfolgreiche Lösungen:**
+- ✅ **Minimale requirements.txt**: Reduziert von 15+ auf 7 essenzielle Pakete
+- ✅ **Debian slim statt Alpine**: Bessere Wheel-Unterstützung
+- ✅ **Multi-Stage Build**: Frontend + Backend getrennt
+- ✅ **Exakte Versionen**: Reproduzierbare Builds
+- ✅ **GitHub Actions Permissions**: `id-token: write` und `attestations: write`
+
+**Ergebnis:** Build-Zeit von 1+ Stunde auf **25 Sekunden** reduziert! 🚀
+
+### 🚀 **Geplante Features (Roadmap)**
+
+**Phase 1 - Erweiterte AI-Features:**
+- [ ] LangChain Integration mit stabileren Versionen
+- [ ] FAISS Vektordatenbank für semantische Suche
+- [ ] RAG (Retrieval Augmented Generation) für DIN-Normen
+- [ ] Embedding-basierte Ähnlichkeitssuche
+
+**Phase 2 - Bildverarbeitung:**
+- [ ] OCR-Integration für gescannte PDFs (pytesseract)
+- [ ] Computer Vision für technische Zeichnungen (OpenCV)
+- [ ] Automatische Bemaßungs-Erkennung
+- [ ] Plantyp-Klassifikation
+
+**Phase 3 - Benutzerfreundlichkeit:**
+- [ ] Batch-Upload für mehrere PDFs
+- [ ] PDF-Annotation mit Markierungen
+- [ ] Interaktive Prüfberichte
+- [ ] Drag & Drop Verbesserungen
+
+**Phase 4 - Enterprise Features:**
+- [ ] Team-Funktionen und Benutzerverwaltung
+- [ ] Rollen-basierte Zugriffskontrollen
+- [ ] Audit-Logs und Compliance
+- [ ] Export-Funktionen (PDF, Excel, JSON)
+
+**Phase 5 - Machine Learning:**
+- [ ] Feedback-Learning System
+- [ ] Benutzerdefinierte Regelsets
+- [ ] Automatische DIN-Norm-Updates
+- [ ] Predictive Analytics
+
+### 🎯 **MVP Focus (Aktuelle Version)**
+
+**Kernfunktionalität beibehalten:**
+- ✅ PDF-Upload über Web-Interface
+- ✅ Text-Extraktion mit PyPDF2
+- ✅ OpenAI GPT-Analyse
+- ✅ REST API mit FastAPI
+- ✅ React/Next.js Frontend
+- ✅ Schnelle, zuverlässige Builds
+
+### 🐳 **Docker Deployment**
+
+**Production-Ready Container:**
+- Multi-Architecture Support (linux/amd64, linux/arm64)
+- Optimierte Layer-Caching
+- Security Attestation
+- Minimale Image-Größe
+
+```bash
+# Docker Pull & Run
+docker pull ghcr.io/christianbernecker/bauplan-checker:latest
+docker run -p 3000:3000 -p 8000:8000 \
+  -e OPENAI_API_KEY=your-key \
+  ghcr.io/christianbernecker/bauplan-checker:latest
+```
 
 ## Support
 
@@ -191,6 +264,6 @@ Bei Fragen oder Problemen:
 
 ---
 
-**Letztes Update:** $(date)
-**Version:** 1.0.0-beta
+**Letztes Update:** 2025-06-27
+**Version:** 1.0.0-mvp  
 **Autor:** Christian Bernecker 

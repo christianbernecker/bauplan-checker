@@ -1,177 +1,92 @@
-# 🏠 Bauplan-Checker auf Raspberry Pi mit Home Assistant
+# 🍓 Bauplan-Checker Installation auf Raspberry Pi & Home Assistant
 
-## Überblick
-Diese Anleitung zeigt, wie Sie das Bauplan-Checker System auf Ihrem Raspberry Pi mit Home Assistant implementieren und im gesamten Netzwerk verfügbar machen.
+## Übersicht
 
-## 📋 Voraussetzungen
+Diese Anleitung beschreibt die Installation des Bauplan-Checkers auf:
+1. **Raspberry Pi** (Standalone)
+2. **Home Assistant Addon** 
+3. **Docker auf Raspberry Pi**
 
-### Hardware
-- Raspberry Pi 4 (4GB RAM empfohlen)
-- Mindestens 32GB SD-Karte (Class 10)
-- Stabile Internetverbindung
+---
 
-### Software
-- Home Assistant OS oder Home Assistant Container
-- SSH-Zugang zum Raspberry Pi
-- Docker (optional, aber empfohlen)
+## 🔧 **Option 1: Raspberry Pi Standalone Installation**
 
-## 🚀 Installation Methoden
+### Voraussetzungen
+- Raspberry Pi 4 (4GB+ RAM empfohlen)
+- Raspberry Pi OS (64-bit)
+- Internetverbindung
+- OpenAI API Key
 
-### Methode 1: Docker Container (Empfohlen)
-
-#### 1. Docker-Setup auf Raspberry Pi
-```bash
-# Docker installieren (falls nicht vorhanden)
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-sudo usermod -aG docker $USER
-
-# Docker Compose installieren
-sudo apt-get update
-sudo apt-get install docker-compose-plugin
-```
-
-#### 2. Bauplan-Checker Container erstellen
-```dockerfile
-# Dockerfile für Raspberry Pi
-FROM python:3.11-slim
-
-# System-Dependencies
-RUN apt-get update && apt-get install -y \
-    tesseract-ocr \
-    tesseract-ocr-deu \
-    poppler-utils \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-
-# Python Dependencies
-COPY backend/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# App Code
-COPY backend/ ./backend/
-COPY frontend/build ./frontend/
-
-# Expose Ports
-EXPOSE 8000 3000
-
-# Start Script
-COPY start-docker.sh .
-RUN chmod +x start-docker.sh
-
-CMD ["./start-docker.sh"]
-```
-
-#### 3. Docker Compose Setup
-```yaml
-# docker-compose.yml
-version: '3.8'
-
-services:
-  bauplan-checker:
-    build: .
-    container_name: bauplan-checker
-    ports:
-      - "8000:8000"    # Backend API
-      - "3000:3000"    # Frontend
-    volumes:
-      - ./data/uploads:/app/backend/uploads
-      - ./data/din_norms:/app/backend/din_norms
-      - ./data/analysis_results:/app/backend/analysis_results
-      - ./data/system_prompts:/app/backend/system_prompts
-    environment:
-      - ENVIRONMENT=production
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-    restart: unless-stopped
-    networks:
-      - bauplan-network
-    
-  # Optional: Reverse Proxy für HTTPS
-  nginx:
-    image: nginx:alpine
-    container_name: bauplan-nginx
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./ssl:/etc/nginx/ssl
-    depends_on:
-      - bauplan-checker
-    restart: unless-stopped
-    networks:
-      - bauplan-network
-
-networks:
-  bauplan-network:
-    driver: bridge
-
-volumes:
-  bauplan-data:
-```
-
-### Methode 2: Native Installation
-
-#### 1. System vorbereiten
+### Schritt 1: System vorbereiten
 ```bash
 # System aktualisieren
 sudo apt update && sudo apt upgrade -y
 
-# Dependencies installieren
-sudo apt install -y \
-    python3 python3-pip python3-venv \
-    tesseract-ocr tesseract-ocr-deu \
-    poppler-utils \
-    nodejs npm \
-    git
+# Docker installieren
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER
+newgrp docker
 
-# User für Bauplan-Checker erstellen
-sudo useradd -m -s /bin/bash bauplan
-sudo usermod -aG sudo bauplan
+# Docker Compose installieren
+sudo pip3 install docker-compose
 ```
 
-#### 2. App installieren
+### Schritt 2: Bauplan-Checker installieren
 ```bash
-# Als bauplan user
-sudo su - bauplan
-
 # Repository klonen
-git clone https://github.com/IHR_REPO/bauplan-checker.git
+git clone https://github.com/christianbernecker/bauplan-checker.git
 cd bauplan-checker
 
-# Backend Setup
-cd backend
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+# Environment konfigurieren
+cp backend/env_example.txt backend/.env
+nano backend/.env
+```
 
-# Frontend Setup
-cd ../frontend
-npm install
-npm run build
+**Wichtige Environment-Variablen:**
+```bash
+# In backend/.env
+OPENAI_API_KEY=sk-your-openai-key-here
+ENVIRONMENT=production
+```
 
+### Schritt 3: Mit Docker Compose starten
+```bash
+# Docker Container starten
+docker-compose up -d
+
+# Status prüfen
+docker-compose ps
+```
+
+### Schritt 4: Zugriff testen
+```bash
+# Backend Test
+curl http://localhost:8000/
+
+# Frontend öffnen
+# Im Browser: http://[raspberry-pi-ip]:3000
+```
+
+### Schritt 5: Autostart konfigurieren
+```bash
 # Systemd Service erstellen
 sudo nano /etc/systemd/system/bauplan-checker.service
 ```
 
-#### 3. Systemd Service Konfiguration
 ```ini
 [Unit]
-Description=Bauplan-Checker Backend
-After=network.target
+Description=Bauplan-Checker Container
+Requires=docker.service
+After=docker.service
 
 [Service]
-Type=simple
-User=bauplan
-Group=bauplan
-WorkingDirectory=/home/bauplan/bauplan-checker/backend
-Environment=PATH=/home/bauplan/bauplan-checker/backend/venv/bin
-ExecStart=/home/bauplan/bauplan-checker/backend/venv/bin/python main.py
-Restart=always
-RestartSec=10
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/home/pi/bauplan-checker
+ExecStart=/usr/bin/docker-compose up -d
+ExecStop=/usr/bin/docker-compose down
+TimeoutStartSec=0
 
 [Install]
 WantedBy=multi-user.target
@@ -179,96 +94,158 @@ WantedBy=multi-user.target
 
 ```bash
 # Service aktivieren
-sudo systemctl daemon-reload
-sudo systemctl enable bauplan-checker
-sudo systemctl start bauplan-checker
+sudo systemctl enable bauplan-checker.service
+sudo systemctl start bauplan-checker.service
 ```
 
-## 🏠 Home Assistant Integration
+---
 
-### 1. Add-on Entwicklung (Erweitert)
+## 🏠 **Option 2: Home Assistant Addon Installation**
 
-#### addon_config.yaml
+### Schritt 1: Repository hinzufügen
+1. **Home Assistant** → **Supervisor** → **Add-on Store**
+2. **⋮** (drei Punkte) → **Repositories**
+3. Repository URL hinzufügen:
+   ```
+   https://github.com/christianbernecker/bauplan-checker
+   ```
+
+### Schritt 2: Addon installieren
+1. **Refresh** klicken
+2. **Bauplan-Checker** Addon finden
+3. **Install** klicken
+
+### Schritt 3: Konfiguration
 ```yaml
-name: "Bauplan-Checker"
-description: "DIN-Normen Compliance Checker für Baupläne"
-version: "1.0.0"
-slug: "bauplan_checker"
-init: false
-arch:
-  - armv7
-  - aarch64
-ports:
-  8000/tcp: 8000
-  3000/tcp: 3000
-options:
-  openai_api_key: ""
-schema:
-  openai_api_key: str
+# Addon Configuration
+openai_api_key: "sk-your-openai-key-here"
+log_level: "info"
+ssl: false
+certfile: ""
+keyfile: ""
 ```
 
-### 2. Home Assistant Dashboard Integration
+### Schritt 4: Addon starten
+1. **Start** klicken
+2. **Show in sidebar** aktivieren
+3. **Auto-start** aktivieren
 
-#### Configuration.yaml Ergänzung
-```yaml
-# Home Assistant Integration
-panel_iframe:
-  bauplan_checker:
-    title: "Bauplan-Checker"
-    icon: mdi:file-document-outline
-    url: "http://192.168.178.145:3000"
-    require_admin: true
+### Schritt 5: Zugriff
+- **Web UI**: http://homeassistant.local:8123/hassio/addon/bauplan-checker/
+- **Direkt**: http://[ha-ip]:3000
 
-# Sensor für Systemstatus
-sensor:
-  - platform: rest
-    name: bauplan_checker_status
-    resource: http://192.168.178.145:8000/health
-    value_template: '{{ value_json.status }}'
-    scan_interval: 30
-```
+---
 
-### 3. Automation Beispiele
-```yaml
-# automation.yaml
-- alias: "Bauplan-Checker Notification"
-  trigger:
-    - platform: webhook
-      webhook_id: bauplan_analysis_complete
-  action:
-    - service: notify.mobile_app
-      data:
-        title: "Bauplan-Analyse abgeschlossen"
-        message: "Ihr Bauplan wurde erfolgreich gegen DIN-Normen geprüft"
-```
+## 🐳 **Option 3: Docker Hub Installation (Einfachste)**
 
-## 🌐 Netzwerk-Konfiguration
-
-### 1. Statische IP konfigurieren
+### Quick Start
 ```bash
-# /etc/dhcpcd.conf
-interface eth0
-static ip_address=192.168.178.145/24
-static routers=192.168.178.1
-static domain_name_servers=192.168.178.1 8.8.8.8
+# Neueste Version pullen und starten
+docker run -d \
+  --name bauplan-checker \
+  -p 3000:3000 \
+  -p 8000:8000 \
+  -e OPENAI_API_KEY=your-key-here \
+  --restart unless-stopped \
+  ghcr.io/christianbernecker/bauplan-checker:latest
 ```
 
-### 2. Firewall Setup
+### Mit Persistenten Daten
 ```bash
-# UFW Firewall
-sudo ufw allow 22      # SSH
-sudo ufw allow 8123    # Home Assistant
-sudo ufw allow 8000    # Bauplan Backend
-sudo ufw allow 3000    # Bauplan Frontend
+# Datenverzeichnisse erstellen
+mkdir -p ~/bauplan-checker/{uploads,analysis_results,din_norms}
+
+# Mit Volume-Mounts starten
+docker run -d \
+  --name bauplan-checker \
+  -p 3000:3000 \
+  -p 8000:8000 \
+  -e OPENAI_API_KEY=your-key-here \
+  -v ~/bauplan-checker/uploads:/app/uploads \
+  -v ~/bauplan-checker/analysis_results:/app/analysis_results \
+  -v ~/bauplan-checker/din_norms:/app/din_norms \
+  --restart unless-stopped \
+  ghcr.io/christianbernecker/bauplan-checker:latest
+```
+
+---
+
+## 📊 **Performance-Optimierung für Raspberry Pi**
+
+### Memory Management
+```bash
+# In docker-compose.yml
+services:
+  bauplan-checker:
+    image: ghcr.io/christianbernecker/bauplan-checker:latest
+    mem_limit: 1g
+    memswap_limit: 1g
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+```
+
+### CPU-Optimierung
+```bash
+# Für Raspberry Pi 4
+docker run \
+  --cpus="2.0" \
+  --memory="1g" \
+  # ... weitere Parameter
+```
+
+### Swap aktivieren (falls nötig)
+```bash
+# Swap-Datei erstellen (2GB)
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+
+# Permanent aktivieren
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+```
+
+---
+
+## 🔐 **Sicherheits-Konfiguration**
+
+### Firewall Setup
+```bash
+# UFW installieren und konfigurieren
+sudo apt install ufw
+sudo ufw allow ssh
+sudo ufw allow 3000  # Frontend
+sudo ufw allow 8000  # Backend API
 sudo ufw enable
 ```
 
-### 3. Nginx Reverse Proxy (Optional)
+### SSL/TLS mit Let's Encrypt (Optional)
+```bash
+# Certbot installieren
+sudo apt install certbot
+
+# Zertifikat anfordern
+sudo certbot certonly --standalone -d your-domain.com
+
+# Nginx Reverse Proxy
+sudo apt install nginx
+```
+
+**Nginx Konfiguration:**
 ```nginx
 # /etc/nginx/sites-available/bauplan-checker
 server {
     listen 80;
-    server_name bauplan.local 192.168.178.145;
+    server_name your-domain.com;
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name your-domain.com;
+    
+    ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
     
     location / {
         proxy_pass http://localhost:3000;
@@ -276,128 +253,143 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
     }
     
-    location /api/ {
-        proxy_pass http://localhost:8000/;
+    location /api {
+        proxy_pass http://localhost:8000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
 }
 ```
 
-## 🔧 Performance-Optimierungen für Raspberry Pi
+---
 
-### 1. Memory Management
+## 📱 **Home Assistant Integration**
+
+### Sensor-Integration
+```yaml
+# configuration.yaml
+rest:
+  - resource: "http://localhost:8000/health"
+    name: "Bauplan Checker Status"
+    scan_interval: 60
+    value_template: "{{ value_json.status }}"
+    
+  - resource: "http://localhost:8000/stats"
+    name: "Bauplan Checker Stats"
+    scan_interval: 300
+    json_attributes:
+      - total_analyses
+      - success_rate
+      - last_analysis
+```
+
+### Automation Beispiel
+```yaml
+# automation.yaml
+- alias: "Bauplan Checker Down Alert"
+  trigger:
+    - platform: state
+      entity_id: sensor.bauplan_checker_status
+      to: "offline"
+      for: "00:05:00"
+  action:
+    - service: notify.mobile_app_your_phone
+      data:
+        title: "⚠️ Bauplan-Checker offline"
+        message: "Der Bauplan-Checker ist seit 5 Minuten nicht erreichbar."
+```
+
+---
+
+## 🔧 **Troubleshooting**
+
+### Häufige Probleme
+
+**1. Container startet nicht:**
 ```bash
-# /boot/config.txt Ergänzungen
-gpu_mem=128
-arm_freq=1800
-over_voltage=6
+# Logs prüfen
+docker logs bauplan-checker
 
-# Swap erweitern
-sudo dphys-swapfile swapoff
-sudo nano /etc/dphys-swapfile
-# CONF_SWAPSIZE=2048
-sudo dphys-swapfile setup
-sudo dphys-swapfile swapon
+# Memory prüfen
+free -h
 ```
 
-### 2. Python Optimierungen
-```python
-# backend/config.py
-import os
-
-# Raspberry Pi spezifische Einstellungen
-RASPBERRY_PI_MODE = True
-MAX_WORKERS = 2  # Begrenzte CPU Cores
-CHUNK_SIZE = 100  # Kleinere Chunks für weniger RAM
-OCR_DPI = 150     # Reduzierte DPI für schnellere Verarbeitung
-CACHE_ENABLED = True  # Aggressive Caching
-```
-
-## 📱 Mobile Zugriff einrichten
-
-### 1. DynDNS Setup (optional)
+**2. Port bereits belegt:**
 ```bash
-# NoIP oder DuckDNS für externen Zugriff
-echo 'url="https://duckdns.org/update?domains=IHRDOMAIN&token=IHRTOKEN&ip="' | sudo tee /usr/local/bin/duck.sh
-sudo chmod 700 /usr/local/bin/duck.sh
-echo '*/5 * * * * /usr/local/bin/duck.sh >/dev/null 2>&1' | sudo crontab
+# Ports prüfen
+sudo netstat -tulpn | grep :3000
+sudo netstat -tulpn | grep :8000
+
+# Alternativen Ports verwenden
+docker run -p 3001:3000 -p 8001:8000 ...
 ```
 
-### 2. HTTPS mit Let's Encrypt
+**3. OpenAI API Fehler:**
 ```bash
-sudo apt install certbot python3-certbot-nginx
-sudo certbot --nginx -d bauplan.ihrdomain.duckdns.org
+# API Key testen
+curl -H "Authorization: Bearer sk-your-key" \
+  https://api.openai.com/v1/models
 ```
 
-## 🔒 Sicherheit
-
-### 1. SSH Härten
+**4. Performance-Probleme:**
 ```bash
-# /etc/ssh/sshd_config
-PermitRootLogin no
-PasswordAuthentication no
-PubkeyAuthentication yes
-Port 2222
+# Container-Resources prüfen
+docker stats bauplan-checker
+
+# Raspberry Pi Temperatur
+vcgencmd measure_temp
 ```
 
-### 2. Fail2Ban installieren
+### Log-Monitoring
 ```bash
-sudo apt install fail2ban
-sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+# Container-Logs live verfolgen
+docker logs -f bauplan-checker
+
+# System-Logs
+journalctl -u bauplan-checker.service -f
 ```
 
-## 📊 Monitoring & Wartung
+---
 
-### 1. Log Rotation
+## 🚀 **Updates**
+
+### Container Update
 ```bash
-# /etc/logrotate.d/bauplan-checker
-/home/bauplan/bauplan-checker/logs/*.log {
-    daily
-    rotate 7
-    compress
-    delaycompress
-    create 644 bauplan bauplan
-}
+# Neue Version pullen
+docker pull ghcr.io/christianbernecker/bauplan-checker:latest
+
+# Container neu starten
+docker stop bauplan-checker
+docker rm bauplan-checker
+
+# Mit neuer Version starten
+docker run -d \
+  --name bauplan-checker \
+  -p 3000:3000 \
+  -p 8000:8000 \
+  -e OPENAI_API_KEY=your-key-here \
+  --restart unless-stopped \
+  ghcr.io/christianbernecker/bauplan-checker:latest
 ```
 
-### 2. Backup Script
+### Automatische Updates
 ```bash
-#!/bin/bash
-# backup-bauplan.sh
-BACKUP_DIR="/home/bauplan/backups"
-DATE=$(date +%Y%m%d_%H%M%S)
-
-tar -czf "$BACKUP_DIR/bauplan_backup_$DATE.tar.gz" \
-  /home/bauplan/bauplan-checker/backend/din_norms \
-  /home/bauplan/bauplan-checker/backend/analysis_results \
-  /home/bauplan/bauplan-checker/backend/system_prompts
+# Watchtower für Auto-Updates
+docker run -d \
+  --name watchtower \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  containrrr/watchtower \
+  --interval 86400 \
+  bauplan-checker
 ```
 
-## 🚀 Deployment Checklist
+---
 
-- [ ] Raspberry Pi Setup und Update
-- [ ] Docker oder Native Installation
-- [ ] OpenAI API Key konfiguriert
-- [ ] DIN-Normen PDFs hochgeladen
-- [ ] Home Assistant Integration getestet
-- [ ] Netzwerk-Zugriff verifiziert
-- [ ] Backup-Strategie implementiert
-- [ ] Monitoring eingerichtet
-- [ ] SSL/HTTPS konfiguriert (optional)
+## ✅ **Installation erfolgreich!**
 
-## 📞 Support & Troubleshooting
+Nach erfolgreicher Installation erreichen Sie den Bauplan-Checker unter:
+- **Frontend**: http://[raspberry-pi-ip]:3000
+- **API**: http://[raspberry-pi-ip]:8000
+- **API Docs**: http://[raspberry-pi-ip]:8000/docs
 
-### Häufige Probleme:
-1. **RAM-Mangel**: Swap erhöhen, Chunk-Größe reduzieren
-2. **OCR langsam**: DPI reduzieren, weniger Sprachen
-3. **Netzwerk-Probleme**: Firewall prüfen, statische IP setzen
-4. **SSL-Fehler**: Zertifikate erneuern, Nginx-Config prüfen
-
-### Log-Dateien:
-- System: `/var/log/syslog`
-- Bauplan-Checker: `/home/bauplan/bauplan-checker/logs/`
-- Nginx: `/var/log/nginx/`
-- Home Assistant: `/config/home-assistant.log`
-
-Das System ist nach dieser Anleitung vollständig in Ihr Home Assistant integriert und im gesamten Netzwerk verfügbar! 🏠🚀 
+**Viel Erfolg mit Ihrem Bauplan-Checker! 🎉** 
