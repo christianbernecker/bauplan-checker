@@ -1,118 +1,89 @@
 # Production Dockerfile für Bauplan-Checker
-# Optimierte Multi-Stage Build für schnellere Builds
+# Vereinfacht und optimiert für schnelle, zuverlässige Builds
 
 # Frontend Build Stage
 FROM node:18-alpine AS frontend-builder
 WORKDIR /build
 
-# Install build dependencies for Alpine
+# Install basic build dependencies
 RUN apk add --no-cache python3 make g++
 
-# Copy entire frontend directory (ensures all files are available)
+# Copy frontend and build
 COPY frontend/ ./
+RUN npm install && npm run build
 
-# Install dependencies
-RUN npm install --verbose
-
-# Build the application
-RUN npm run build
-
-# Backend Dependencies Stage - Verwende Standard Python Image für bessere Wheel-Unterstützung
+# Backend Stage - Verwende Python mit vorinstallierten wissenschaftlichen Bibliotheken
 FROM python:3.11-slim AS backend-builder
 WORKDIR /build
 
-# Install system dependencies
+# Minimale Build-Dependencies installieren
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
     make \
-    cmake \
     pkg-config \
-    libopenblas-dev \
-    liblapack-dev \
-    gfortran \
-    libjpeg-dev \
-    zlib1g-dev \
-    libfreetype6-dev \
-    liblcms2-dev \
-    libopenjp2-7-dev \
-    libtiff5-dev \
-    tk-dev \
-    tcl-dev \
-    libharfbuzz-dev \
-    libfribidi-dev \
-    libxcb1-dev \
-    libpng-dev \
-    tesseract-ocr \
-    tesseract-ocr-dev \
-    libleptonica-dev \
+    libffi-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
+# Requirements kopieren und installieren
 COPY backend/requirements.txt ./
-
-# Upgrade pip and install packages with better caching
 RUN pip install --upgrade pip setuptools wheel && \
     pip install --no-cache-dir --prefer-binary -r requirements.txt
 
-# Final Production Image - Verwende slim für kleinere Image-Größe
+# Final Production Image
 FROM python:3.11-slim
 WORKDIR /app
 
-# Install runtime dependencies only
+# Nur Runtime-Dependencies installieren
 RUN apt-get update && apt-get install -y \
-    tesseract-ocr \
-    tesseract-ocr-deu \
-    tesseract-ocr-eng \
-    poppler-utils \
     curl \
     bash \
-    libjpeg62-turbo \
-    libopenblas0 \
-    libgomp1 \
+    poppler-utils \
+    tesseract-ocr \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Node.js for frontend
+# Node.js für Frontend installieren
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs
+    apt-get update && apt-get install -y nodejs && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copy Python Dependencies
+# Python Dependencies kopieren
 COPY --from=backend-builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=backend-builder /usr/local/bin /usr/local/bin
 
-# Copy Backend (NUR aus Root backend/)
+# Backend Dateien kopieren
 COPY backend/main.py ./
 COPY backend/din_processor.py ./
 COPY backend/technical_drawing_processor.py ./
 COPY backend/requirements.txt ./
 COPY backend/system_prompts/ ./system_prompts/
 
-# Copy Frontend Build
+# Frontend Build kopieren
 COPY --from=frontend-builder /build/.next ./frontend/.next
 COPY --from=frontend-builder /build/package*.json ./frontend/
 COPY --from=frontend-builder /build/node_modules ./frontend/node_modules
 COPY --from=frontend-builder /build/public ./frontend/public
 COPY --from=frontend-builder /build/next.config.ts ./frontend/
 
-# Create Required Directories
+# Verzeichnisse erstellen
 RUN mkdir -p uploads din_norms analysis_results && \
     chmod -R 755 /app
 
-# Environment
+# Umgebungsvariablen
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
 ENV NODE_ENV=production
 
 # Health Check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://localhost:8000/ || exit 1
 
 # Ports
 EXPOSE 3000 8000
 
-# Copy and Setup Start Script
+# Start Script
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
